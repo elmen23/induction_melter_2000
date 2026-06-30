@@ -1,0 +1,5 @@
+# ESP32 Partition Table — Single Factory App (no OTA)
+# Name,   Type, SubType, Offset,  Size,    Flags
+nvs,      data, nvs,     0x9000,  0x5000,
+factory,  app,  factory, 0x10000, 0x3C0000,
+spiffs,   data, spiffs,  0x3D0000, 0x20000,

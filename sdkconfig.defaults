@@ -1,0 +1,6 @@
+#
+# MCPWM ISR in IRAM
+# This reduces ISR latency by placing the MCPWM interrupt handler in IRAM,
+# avoiding flash cache misses when flash is being accessed by other tasks.
+#
+CONFIG_MCPWM_ISR_IN_IRAM=y

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IH-2000 — Induction Heater Controller</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+</head>
+<body>
+    <!-- ═══ TOP NAV BAR ═══ -->
+    <header class="topbar">
+        <div class="topbar-brand">
+            <span class="brand-icon">⬡</span>
+            <div>
+                <h1 class="brand-title">IH-2000</h1>
+                <span class="brand-sub">Industrial Induction Heater</span>
+            </div>
+        </div>
+        <div class="topbar-center">
+            <div class="status-pill" id="sysStatus">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">INITIALIZING</span>
+            </div>
+            <div class="wifi-badge" id="wifiBadge" style="cursor:pointer" onclick="openWifiModal()">
+                <span class="wifi-icon">📶</span>
+                <span id="wifiInfo">--</span>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <button class="btn btn-danger btn-lg" id="btnEStop">
+                <span class="estop-icon">⬛</span>
+                EMERGENCY STOP
+            </button>
+        </div>
+    </header>
+
+    <!-- ═══ MAIN GRID ═══ -->
+    <main class="dashboard">
+        <!-- Row 1: Power Control -->
+        <section class="card card-power">
+            <div class="card-header">
+                <h2>Power Output</h2>
+                <span class="value-badge" id="badgePower">0.0 kW</span>
+            </div>
+            <div class="card-body">
+                <div class="power-ring-container">
+                    <svg class="power-ring" viewBox="0 0 160 160">
+                        <circle class="ring-bg" cx="80" cy="80" r="68"/>
+                        <circle class="ring-fg" id="powerRing" cx="80" cy="80" r="68"/>
+                        <text class="ring-value" x="80" y="70" id="ringPowerVal">0.0</text>
+                        <text class="ring-unit" x="80" y="95">kW</text>
+                    </svg>
+                </div>
+                <div class="power-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Voltage</span>
+                        <span class="meta-value" id="metaVoltage">-- V</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Current</span>
+                        <span class="meta-value" id="metaCurrent">-- A</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Temperature</span>
+                        <span class="meta-value" id="metaTemp">-- °C</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Row 2-5: PWM Parameters (all in one card) -->
+        <section class="card card-params">
+            <div class="card-header">
+                <h2>PWM Parameters</h2>
+                <label class="toggle">
+                    <input type="checkbox" id="chkEnable">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label" id="lblEnable">OFF</span>
+                </label>
+            </div>
+            <div class="card-body">
+                <div class="param-grid">
+                    <!-- Frequency -->
+                    <div class="param-item">
+                        <div class="param-header">
+                            <h3>Switching Frequency</h3>
+                            <span class="value-badge" id="badgeFreq">40.0 kHz</span>
+                        </div>
+                        <input type="range" id="sliderFreq" class="slider"
+                               min="20" max="100" value="40" step="0.5">
+                        <div class="slider-labels">
+                            <span>20 kHz</span>
+                            <span>60 kHz</span>
+                            <span>100 kHz</span>
+                        </div>
+                        <div class="numeric-input-row">
+                            <label for="numFreq">Set Frequency</label>
+                            <div class="input-group">
+                                <input type="number" id="numFreq" class="num-input"
+                                       min="20" max="100" value="40" step="0.5">
+                                <span class="input-unit">kHz</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Duty Cycle -->
+                    <div class="param-item">
+                        <div class="param-header">
+                            <h3>Duty Cycle</h3>
+                            <span class="value-badge" id="badgeDuty">45.0 %</span>
+                        </div>
+                        <input type="range" id="sliderDuty" class="slider"
+                               min="0" max="100" value="45" step="0.5">
+                        <div class="slider-labels">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                        <div class="numeric-input-row">
+                            <label for="numDuty">Set Duty</label>
+                            <div class="input-group">
+                                <input type="number" id="numDuty" class="num-input"
+                                       min="0" max="100" value="45" step="0.5">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dead Time RED -->
+                    <div class="param-item">
+                        <div class="param-header">
+                            <h3>Dead Time <span class="highlight">RED</span></h3>
+                            <span class="value-badge" id="badgeRed">200 ns</span>
+                        </div>
+                        <input type="range" id="sliderRed" class="slider"
+                               min="0" max="1000" value="200" step="5">
+                        <div class="slider-labels">
+                            <span>0 ns</span>
+                            <span>500 ns</span>
+                            <span>1000 ns</span>
+                        </div>
+                        <div class="numeric-input-row">
+                            <label for="numRed">Rising Edge Delay</label>
+                            <div class="input-group">
+                                <input type="number" id="numRed" class="num-input"
+                                       min="0" max="1000" value="200" step="5">
+                                <span class="input-unit">ns</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dead Time FED -->
+                    <div class="param-item">
+                        <div class="param-header">
+                            <h3>Dead Time <span class="highlight">FED</span></h3>
+                            <span class="value-badge" id="badgeFed">200 ns</span>
+                        </div>
+                        <input type="range" id="sliderFed" class="slider"
+                               min="0" max="1000" value="200" step="5">
+                        <div class="slider-labels">
+                            <span>0 ns</span>
+                            <span>500 ns</span>
+                            <span>1000 ns</span>
+                        </div>
+                        <div class="numeric-input-row">
+                            <label for="numFed">Falling Edge Delay</label>
+                            <div class="input-group">
+                                <input type="number" id="numFed" class="num-input"
+                                       min="0" max="1000" value="200" step="5">
+                                <span class="input-unit">ns</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Row 6: PWM Visualizer -->
+        <section class="card card-wide">
+            <div class="card-header">
+                <h2>PWM Output Waveform</h2>
+                <div class="header-indicators">
+                    <span class="ind-led led-a" id="ledA">A</span>
+                    <span class="ind-led led-b" id="ledB">B</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="waveform-container">
+                    <svg class="waveform" viewBox="0 0 800 120" preserveAspectRatio="none" id="waveSvg">
+                        <!-- Channel A -->
+                        <line class="wave-label" x1="0" y1="10" x2="0" y2="10" />
+                        <text class="wave-label-text" x="10" y="20">PWM-A</text>
+                        <!-- Channel B -->
+                        <text class="wave-label-text" x="10" y="80">PWM-B</text>
+                        <!-- Dead time indicator zone -->
+                        <rect class="dt-zone" x="0" y="44" width="800" height="32" rx="0" />
+                        <text class="dt-label" x="400" y="64" text-anchor="middle">DEAD TIME ZONE</text>
+                        <!-- Phase indicator -->
+                        <text class="phase-label" x="760" y="110" text-anchor="end">Waiting...</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/script.js"></script>
+
+<!-- ═══ WiFi SETTINGS MODAL ═══ -->
+<div class="modal-overlay" id="wifiModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>WiFi Settings</h2>
+            <button class="modal-close" onclick="closeWifiModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="wifi-status-card">
+                <div class="wifi-status-row">
+                    <span class="wifi-stat-label">Mode</span>
+                    <span class="wifi-stat-value" id="modalWifiMode">--</span>
+                </div>
+                <div class="wifi-status-row">
+                    <span class="wifi-stat-label">AP Network</span>
+                    <span class="wifi-stat-value" id="modalApSsid">IH-2000</span>
+                </div>
+                <div class="wifi-status-row">
+                    <span class="wifi-stat-label">AP IP</span>
+                    <span class="wifi-stat-value" id="modalApIp">192.168.4.1</span>
+                </div>
+                <div class="wifi-status-row">
+                    <span class="wifi-stat-label">AP Clients</span>
+                    <span class="wifi-stat-value" id="modalApClients">0</span>
+                </div>
+                <div class="wifi-status-row" id="staStatusRow">
+                    <span class="wifi-stat-label">STA Network</span>
+                    <span class="wifi-stat-value" id="modalStaSsid">Not connected</span>
+                </div>
+                <div class="wifi-status-row" id="staIpRow">
+                    <span class="wifi-stat-label">STA IP</span>
+                    <span class="wifi-stat-value" id="modalStaIp">--</span>
+                </div>
+            </div>
+            <hr class="modal-divider">
+            <h3>Connect to WiFi Network</h3>
+            <form id="wifiForm" onsubmit="return connectWifi(event)">
+            <hr class="modal-divider">
+            <h3>Available Networks</h3>
+            <button type="button" class="btn btn-scan" id="btnScan" onclick="scanWifi()">
+                <span class="btn-icon">&#x1f50d;</span> Scan Networks
+            </button>
+            <div class="scan-status" id="scanStatus"></div>
+            <div class="networks-list" id="networksList"></div>
+
+                <div class="form-group">
+                    <label for="wifiSsid">SSID (Network Name)</label>
+                    <input type="text" id="wifiSsid" class="form-input" placeholder="Enter WiFi SSID" required>
+                </div>
+                <div class="form-group">
+                    <label for="wifiPass">Password</label>
+                    <input type="password" id="wifiPass" class="form-input" placeholder="Enter WiFi password">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="btnWifiConnect">
+                        <span class="btn-icon">&#x1f4e1;</span> Connect
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btnWifiForget" onclick="forgetWifi()">
+                        <span class="btn-icon">&#x274c;</span> Forget Network
+                    </button>
+                </div>
+                <div class="wifi-msg" id="wifiMsg"></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

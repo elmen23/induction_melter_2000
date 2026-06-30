@@ -1,0 +1,43 @@
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+.vscode/
+
+# Build artifacts
+sdkconfig
+sdkconfig.old
+sdkconfig.*.old
+sdkconfig.esp32dev
+*.bin
+*.elf
+*.map
+*.hex
+
+# Backups
+*.backup
+*.bak
+*~
+
+# IDE / OS
+.vscode/
+.idea/
+.vs/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+/tmp/
+*.tmp
+
+# Compiled Python
+*.pyc
+*.pyo
+__pycache__/
+build/
+dist/
+*.egg-info/
